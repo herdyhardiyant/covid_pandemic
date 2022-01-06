@@ -49,7 +49,7 @@ class CountriesDataProvider {
 
   Future<LatLng> getCountryLocation(String countryName) async {
     final uri = Uri.parse(
-        "https://corona.lmao.ninja/v2/countries/${countryName}?yesterday=true&strict=true&query");
+        "https://corona.lmao.ninja/v2/countries/$countryName?yesterday=true&strict=true&query");
     try {
       final response = await http.get(uri);
       final extractedData = json.decode(response.body);
