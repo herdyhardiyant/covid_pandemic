@@ -17,18 +17,23 @@ class CountryDropdownMenu extends StatefulWidget {
 class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
   late List<String> _allCountriesName;
   late String _dropdownValue;
+  late List<DropdownMenuItem<String>> _menuItems;
   var _isLoading = true;
 
   @override
-  void initState() {
-      _dropdownValue = widget.selectedMenu;
-      _retrieveAllCountriesName();
-    super.initState();
+  void didChangeDependencies() {
+    _dropdownValue = widget.selectedMenu;
+    _retrieveAllCountriesName().then((_) {
+      _menuItems = _buildAllDropdownItems();
+    }).then((_) {
+      _turnOffLoading();
+    });
+    super.didChangeDependencies();
   }
 
-  @override
+ @override
   void didUpdateWidget(covariant CountryDropdownMenu oldWidget) {
-      _dropdownValue = widget.selectedMenu;
+    _dropdownValue = widget.selectedMenu;
     super.didUpdateWidget(oldWidget);
   }
 
@@ -56,7 +61,6 @@ class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
     /// Global, to show global corona stats
     _allCountriesName = ["Global" ,_dropdownValue, ...countriesName];
     _removeAllDuplicatesInDropdownMenu();
-    _turnOffLoading();
   }
 
   void _removeAllDuplicatesInDropdownMenu(){
@@ -73,22 +77,27 @@ class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
     return DropdownButton<String>(
       value: _dropdownValue,
       menuMaxHeight: 200.0,
-      items: _buildAllDropdownItems(),
+      items: _menuItems,
       onChanged: _changeDropdownButtonHandler,
     );
   }
 
   List<DropdownMenuItem<String>> _buildAllDropdownItems(){
+
     return _allCountriesName
         .map<DropdownMenuItem<String>>(_buildDropdownMenuItem)
         .toList();
   }
 
   void _changeDropdownButtonHandler(String? selectedCountryName){
+    _updateCurrentlySelectedMenu(selectedCountryName);
+    widget.onChanged(selectedCountryName!);
+  }
+
+  void _updateCurrentlySelectedMenu(String? selectedCountryName){
     setState(() {
       _dropdownValue = selectedCountryName!;
     });
-    widget.onChanged(selectedCountryName!);
   }
 
   DropdownMenuItem<String> _buildDropdownMenuItem(String countryName){

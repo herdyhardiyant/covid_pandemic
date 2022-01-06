@@ -37,6 +37,12 @@ class _CoronavirusStatisticScreenState
   }
 
   @override
+  void didChangeDependencies() {
+    _initCovidDataBySelectedMenu();
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context);
     var statisticContainerHeight =
@@ -174,7 +180,6 @@ class _CoronavirusStatisticScreenState
   }
 
   Widget _buildCoronavirusStatistic() {
-    _initCovidDataBySelectedMenu();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(_latestCovidDataDate),
       Row(
