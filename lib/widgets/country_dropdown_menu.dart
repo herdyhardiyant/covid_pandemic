@@ -24,7 +24,7 @@ class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
   void didChangeDependencies() {
     _dropdownValue = widget.selectedMenu;
     _retrieveAllCountriesName().then((_) {
-      _menuItems = _buildAllDropdownItems();
+       _buildAllDropdownItems();
     }).then((_) {
       _turnOffLoading();
     });
@@ -79,12 +79,12 @@ class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
       menuMaxHeight: 200.0,
       items: _menuItems,
       onChanged: _changeDropdownButtonHandler,
+
     );
   }
 
-  List<DropdownMenuItem<String>> _buildAllDropdownItems(){
-
-    return _allCountriesName
+  void _buildAllDropdownItems(){
+    _menuItems = _allCountriesName
         .map<DropdownMenuItem<String>>(_buildDropdownMenuItem)
         .toList();
   }
