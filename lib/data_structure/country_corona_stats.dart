@@ -1,6 +1,6 @@
 
 
-class CoronavirusStatistic {
+class CountryCoronaStats {
   final String id;
   final String countryName;
   final int totalConfirmedCases;
@@ -8,7 +8,7 @@ class CoronavirusStatistic {
   final int totalDeaths;
   final int newDeaths;
 
-  CoronavirusStatistic(
+  CountryCoronaStats(
       {required this.id,
       required this.countryName,
       required this.totalConfirmedCases,

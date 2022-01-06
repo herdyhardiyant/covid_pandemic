@@ -5,10 +5,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CoronavirusMap extends StatefulWidget {
   final void Function(GoogleMapController mapController) onMapCreated;
+  final void Function(String selectedCountryMarker) onTapMarker;
 
   const CoronavirusMap({
     Key? key,
-    required this.onMapCreated,
+    required this.onMapCreated, required this.onTapMarker,
   }) : super(key: key);
 
   @override
@@ -57,6 +58,9 @@ class _CoronavirusMapState extends State<CoronavirusMap> {
         markerId: MarkerId(name),
         position: location,
         infoWindow: InfoWindow(title: name),
+        onTap: (){
+          widget.onTapMarker(name);
+        }
       ));
     }
   }

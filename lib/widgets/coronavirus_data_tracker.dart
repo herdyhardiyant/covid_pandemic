@@ -18,15 +18,7 @@ class DataTracker extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-          decoration:
-              BoxDecoration(border: Border.all(width: 1, color: Colors.white)),
-          child: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
+        _buildLabel(),
         const SizedBox(height: gap),
         Text(
           totalValue,
@@ -38,4 +30,19 @@ class DataTracker extends StatelessWidget {
       ]),
     );
   }
+
+  Widget _buildLabel(){
+    return  Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration:
+      BoxDecoration(border: Border.all(width: 1, color: Colors.white)),
+      child: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+
+
 }

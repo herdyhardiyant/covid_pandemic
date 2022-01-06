@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../widgets/coronavirus_data_tracker.dart';
-import '../data_structure/coronavirus_statistic.dart';
+import '../data_structure/country_corona_stats.dart';
 import '../widgets/coronavirus_map.dart';
 
 class CoronavirusStatisticScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class CoronavirusStatisticScreen extends StatefulWidget {
 
 class _CoronavirusStatisticScreenState
     extends State<CoronavirusStatisticScreen> {
-  String _selectedCountry = "Global";
+  late String _selectedCountry;
   late GoogleMapController _mapController;
   late String _totalConfirmedCasesBySelectedMenu;
   late String _newConfirmedCasesBySelectedMenu;
@@ -30,13 +30,8 @@ class _CoronavirusStatisticScreenState
   var _isLoading = true;
 
   @override
-  void dispose() {
-    _mapController.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
+    _selectedCountry = "Global";
     _initCovidDataBySelectedMenu();
     super.initState();
   }
@@ -55,11 +50,14 @@ class _CoronavirusStatisticScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              CountryDropdownMenu(onChanged: _changeSelectedCountryHandler),
+              CountryDropdownMenu(
+                  onChanged: _changeSelectedCountryHandler,
+                  selectedMenu: _selectedCountry),
               _buildDivider(),
               _isLoading ? _loading : _buildCoronavirusStatistic(),
               _buildDivider(),
-              _buildCoronavirusMap()
+              _buildCoronavirusMap(),
+              _buildDivider()
             ],
           ),
         ),
@@ -67,7 +65,7 @@ class _CoronavirusStatisticScreenState
     );
   }
 
-  Widget _buildDivider(){
+  Widget _buildDivider() {
     return const Divider(
       height: 24,
       thickness: 4,
@@ -87,19 +85,21 @@ class _CoronavirusStatisticScreenState
           child: CircularProgressIndicator(),
         ));
   }
-  Widget _buildCoronavirusMap(){
+
+  Widget _buildCoronavirusMap() {
     return SizedBox(
-        height: 200,
+        height: 350,
         child: CoronavirusMap(
           onMapCreated: (controller) {
             _mapController = controller;
           },
+          onTapMarker: _changeSelectedCountryHandler,
         ));
   }
 
   Future<void> _changeSelectedCountryHandler(String? selectedValue) async {
     setState(() {
-      _isLoading = true;
+      _turnOnLoading();
       _selectedCountry = selectedValue!;
       _initCovidDataBySelectedMenu();
     });
@@ -111,21 +111,25 @@ class _CoronavirusStatisticScreenState
     _animateCameraToTheSelectedCountry();
   }
 
+  void _turnOnLoading() {
+    setState(() {
+      _isLoading = true;
+    });
+  }
+
   void _animateCameraForGlobalData() {
-    _mapController.animateCamera(
-        CameraUpdate.newLatLngZoom(const LatLng(0, 0), 0.0));
+    _mapController
+        .animateCamera(CameraUpdate.newLatLngZoom(const LatLng(0, 0), 0.0));
   }
 
   Future<void> _animateCameraToTheSelectedCountry() async {
-    final countryLocation = await Provider.of<CountriesDataProvider>(
-        context, listen: false)
-        .getCountryLocation(_selectedCountry);
-    _mapController.animateCamera(
-        CameraUpdate.newLatLngZoom(countryLocation, 4.0));
+    final countryLocation =
+        await Provider.of<CountriesDataProvider>(context, listen: false)
+            .getCountryLocation(_selectedCountry);
+    _mapController
+        .animateCamera(CameraUpdate.newLatLngZoom(countryLocation, 4.0));
     _mapController.showMarkerInfoWindow(MarkerId(_selectedCountry));
   }
-
-
 
   Future<void> _initCovidDataBySelectedMenu() async {
     if (_selectedCountry == "Global") {
@@ -136,21 +140,20 @@ class _CoronavirusStatisticScreenState
   }
 
   Future<void> _initCovidDGlobalData() async {
-    final CoronavirusStatistic covidData =
-    await Provider
-        .of<CoronavirusDataProvider>(context, listen: false)
-        .globalStats;
+    final CountryCoronaStats covidData =
+        await Provider.of<CoronavirusDataProvider>(context, listen: false)
+            .globalStats;
     _initCovidData(covidData);
   }
 
   Future<void> _initCovidDataByCountry() async {
-    final CoronavirusStatistic covidData =
-    await Provider.of<CoronavirusDataProvider>(context, listen: false)
-        .retrieveCoronavirusDataByCountry(_selectedCountry);
+    final CountryCoronaStats covidData =
+        await Provider.of<CoronavirusDataProvider>(context, listen: false)
+            .retrieveCoronavirusDataByCountry(_selectedCountry);
     _initCovidData(covidData);
   }
 
-  void _initCovidData(CoronavirusStatistic covidData) {
+  void _initCovidData(CountryCoronaStats covidData) {
     final numberFormatter = NumberFormat();
     _totalConfirmedCasesBySelectedMenu =
         numberFormatter.format(covidData.totalConfirmedCases);
@@ -164,7 +167,7 @@ class _CoronavirusStatisticScreenState
     _turnOffLoading();
   }
 
-  void _turnOffLoading(){
+  void _turnOffLoading() {
     setState(() {
       _isLoading = false;
     });

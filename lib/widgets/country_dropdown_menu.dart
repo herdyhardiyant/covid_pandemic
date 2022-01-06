@@ -5,8 +5,9 @@ import '../providers/countries_data_provider.dart';
 
 class CountryDropdownMenu extends StatefulWidget {
   final void Function(String selectedItem) onChanged;
+  final String selectedMenu;
 
-  const CountryDropdownMenu({Key? key, required this.onChanged})
+  const CountryDropdownMenu({Key? key, required this.onChanged, required this.selectedMenu})
       : super(key: key);
 
   @override
@@ -14,14 +15,21 @@ class CountryDropdownMenu extends StatefulWidget {
 }
 
 class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
-  List<String> _allCountriesName = ["Global"];
-  String _dropdownValue = "Global";
+  late List<String> _allCountriesName;
+  late String _dropdownValue;
   var _isLoading = true;
 
   @override
   void initState() {
-    _retrieveAllCountriesName();
+      _dropdownValue = widget.selectedMenu;
+      _retrieveAllCountriesName();
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant CountryDropdownMenu oldWidget) {
+      _dropdownValue = widget.selectedMenu;
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -33,29 +41,9 @@ class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
           border: Border.all(color: Colors.white60),
           borderRadius: BorderRadius.circular(4)),
       child: _isLoading
-          ? const Center(
-              heightFactor: 1.5,
-              child: CircularProgressIndicator(),
-            )
+          ? _buildLoading()
           : DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _dropdownValue,
-                hint: const Text("Select Menu"),
-                menuMaxHeight: 200.0,
-                items: _allCountriesName
-                    .map<DropdownMenuItem<String>>(
-                        (countryName) => DropdownMenuItem(
-                              child: Text(countryName),
-                              value: countryName,
-                            ))
-                    .toList(),
-                onChanged: (String? selectedCountryName) {
-                  setState(() {
-                    _dropdownValue = selectedCountryName!;
-                  });
-                  widget.onChanged(selectedCountryName!);
-                },
-              ),
+              child: _buildDropdownButton(),
             ),
     );
   }
@@ -65,10 +53,56 @@ class _CountryDropdownMenuState extends State<CountryDropdownMenu> {
         await Provider.of<CountriesDataProvider>(context, listen: false)
             .retrieveAllTheAvailableCountriesName;
 
-    /// Add global menu, to show global stats
-    _allCountriesName = [..._allCountriesName, ...countriesName];
+    /// Global, to show global corona stats
+    _allCountriesName = ["Global" ,_dropdownValue, ...countriesName];
+    _removeAllDuplicatesInDropdownMenu();
+    _turnOffLoading();
+  }
+
+  void _removeAllDuplicatesInDropdownMenu(){
+    _allCountriesName = _allCountriesName.toSet().toList();
+  }
+
+  void _turnOffLoading(){
     setState(() {
       _isLoading = false;
     });
   }
+
+  Widget _buildDropdownButton(){
+    return DropdownButton<String>(
+      value: _dropdownValue,
+      menuMaxHeight: 200.0,
+      items: _buildAllDropdownItems(),
+      onChanged: _changeDropdownButtonHandler,
+    );
+  }
+
+  List<DropdownMenuItem<String>> _buildAllDropdownItems(){
+    return _allCountriesName
+        .map<DropdownMenuItem<String>>(_buildDropdownMenuItem)
+        .toList();
+  }
+
+  void _changeDropdownButtonHandler(String? selectedCountryName){
+    setState(() {
+      _dropdownValue = selectedCountryName!;
+    });
+    widget.onChanged(selectedCountryName!);
+  }
+
+  DropdownMenuItem<String> _buildDropdownMenuItem(String countryName){
+    return DropdownMenuItem(
+      child: Text(countryName),
+      value: countryName,
+    );
+  }
+
+  Widget _buildLoading(){
+    return const Center(
+      heightFactor: 1.5,
+      child: CircularProgressIndicator(),
+    );
+  }
+
 }
